@@ -119,6 +119,14 @@ export default function ToolCard (props: ToolCardProps) {
           aria-describedby={buttonLoadingId}
           aria-busy={updateToolNavLoading}
         >
+          <Button
+            onClick={() => setShowMoreInfo(!showMoreInfo)}
+            aria-expanded={showMoreInfo}
+            aria-label={`Show ${moreOrLessText} Info`}
+            startIcon={!showMoreInfo ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+          >
+            {moreOrLessText}
+          </Button>
           {
             tool.navigation_enabled
               ? (
@@ -148,14 +156,6 @@ export default function ToolCard (props: ToolCardProps) {
               </Tooltip>
             )
           }
-          <Button
-            onClick={() => setShowMoreInfo(!showMoreInfo)}
-            aria-expanded={showMoreInfo}
-            aria-label={`Show ${moreOrLessText} Info`}
-            startIcon={!showMoreInfo ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-          >
-            {moreOrLessText}
-          </Button>
         </Grid>
       </CardActions>
       <Collapse in={showMoreInfo} unmountOnExit>
