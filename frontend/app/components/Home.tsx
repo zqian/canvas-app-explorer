@@ -92,7 +92,7 @@ function Home (props: HomeProps) {
       <HeaderAppBar user={globals.user} helpURL={globals.help_url} onFilterChange={(v) => setSearchFilter(v)} />
       <MainContainer>
         <Typography variant='h6' component='h2' sx={{ textAlign: 'center', marginBottom: 3 }}>
-          Find the best tools for your class and students
+          Instructor Tools is a collection of tools and resources to improve the online experience for you and your students.
         </Typography>
         {feedbackBlock}
         <Grid container justifyContent='center' sx={{ marginBottom: 2 }}>
