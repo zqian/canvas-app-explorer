@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Grid, LinearProgress, Snackbar, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
@@ -36,7 +36,7 @@ function Home (props: HomeProps) {
   const [searchFilter, setSearchFilter] = useState('');
   const [showRefreshAlert, setShowRefreshAlert] = useState<undefined | boolean>(undefined);
 
-  const { isLoading: getToolsLoading, error: getToolsError } = useQuery('getTools', getTools, {
+  const { isLoading: getToolsLoading, error: getToolsError } = useQuery(['getTools'], getTools, {
     onSuccess: (data) => setTools(data)
   });
 
@@ -105,7 +105,7 @@ function Home (props: HomeProps) {
         </div>
       </MainContainer>
       <Typography component='footer' sx={{ textAlign: 'center' }}>
-        Copyright © 2022 The Regents of the University of Michigan
+        Copyright © 2024 The Regents of the University of Michigan
       </Typography>
       <Snackbar open={showRefreshAlert} onClose={handleRefreshAlertClose} autoHideDuration={10000}>
         <Alert severity='info' elevation={2} onClose={handleRefreshAlertClose}>
