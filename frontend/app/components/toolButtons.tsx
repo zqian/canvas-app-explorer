@@ -6,12 +6,12 @@ import { Button, ButtonProps } from '@mui/material';
 function AddToolButton (props: ButtonProps) {
   return (
     <Button
-      aria-label='Add tool to course'
+      aria-label='Enable tool in course'
       variant='contained'
       startIcon={<AddIcon />}
       {...props}
     >
-      Add tool
+      Enable
     </Button>
   );
 }
@@ -19,12 +19,12 @@ function AddToolButton (props: ButtonProps) {
 function RemoveToolButton (props: ButtonProps) {
   return (
     <Button
-      aria-label='Remove tool from course'
+      aria-label='Disable tool in course'
       variant='outlined'
       startIcon={<RemoveIcon />}
       {...props}
     >
-      Remove tool
+      Disable
     </Button>
   );
 }
