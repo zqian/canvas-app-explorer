@@ -1,3 +1,4 @@
+
 from typing import List
 
 from django.contrib.auth.models import User
@@ -5,7 +6,6 @@ from rest_framework import fields, serializers
 
 from backend.canvas_app_explorer import models
 from backend.canvas_app_explorer.canvas_lti_manager.data_class import ExternalToolTab
-
 
 class GlobalsUserSerializer(serializers.ModelSerializer):
     """
@@ -35,7 +35,7 @@ class LtiToolSerializer(serializers.ModelSerializer):
         fields = [
             'name', 'canvas_id', 'logo_image', 'logo_image_alt_text', 'main_image',
             'main_image_alt_text', 'short_description', 'long_description', 'privacy_agreement',
-            'support_resources', 'canvas_placement_expanded'
+            'support_resources', 'canvas_placement_expanded', 'launch_url',
         ]
 
 
@@ -55,13 +55,15 @@ class LtiToolWithNavSerializer(LtiToolSerializer):
         available_tools = self.context['available_tools']
         # Search in tools available in the context for a canvas ID matching the model instance
         matches: List[ExternalToolTab] = list(filter(lambda x: x.id == obj.canvas_id, available_tools))
-        if len(matches) == 1:
-            first_match = matches[0] # Canvas IDs should be unique
-            return not first_match.is_hidden
-        raise Exception(
-            'Expected exactly one match for available tool data from Canvas; '
-            f'{len(matches)} were found.'
-        )
+        # For LTI tools (null for launch_url), if there is exactly one match, return its navigation status
+        if obj.launch_url is None:
+            if len(matches) == 1:
+                first_match = matches[0] # Canvas IDs should be unique
+                return not first_match.is_hidden
+            raise Exception(
+                'Expected exactly one match for available tool data from Canvas; '
+                f'{len(matches)} were found.'
+            )
 
     class Meta(LtiToolSerializer.Meta):
         fields = LtiToolSerializer.Meta.fields + ['navigation_enabled']

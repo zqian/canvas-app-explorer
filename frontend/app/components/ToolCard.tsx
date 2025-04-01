@@ -128,18 +128,30 @@ export default function ToolCard (props: ToolCardProps) {
             {moreOrLessText}
           </Button>
           {
-            tool.navigation_enabled
+            tool.launch_url != null
               ? (
-                <RemoveToolButton
-                  disabled={updateToolNavLoading}
-                  onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: false })}
-                />
-              )
-              : (
-                <AddToolButton
-                  disabled={updateToolNavLoading}
-                  onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: true })}
-                />
+                <Button
+                  component="a"
+                  href={tool.launch_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Launch
+                </Button>
+              ) : (
+              tool.navigation_enabled
+                ? (
+                  <RemoveToolButton
+                    disabled={updateToolNavLoading}
+                    onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: false })}
+                  />
+                )
+                : (
+                  <AddToolButton
+                    disabled={updateToolNavLoading}
+                    onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: true })}
+                  />
+                )
               )
           }
           {

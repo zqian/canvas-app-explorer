@@ -1,5 +1,7 @@
 import logging
 
+from django.db.models import Q  # Add this import at the top
+
 from django.conf import settings
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import authentication, permissions, status, viewsets
@@ -36,7 +38,8 @@ class LTIToolViewSet(viewsets.ViewSet):
 
         logger.debug('available_tools: ' + ', '.join([tool.__str__() for tool in available_tools]))
         available_tool_ids = [t.id for t in available_tools]
-        queryset = models.LtiTool.objects.filter(canvas_id__isnull=False, canvas_id__in=available_tool_ids)\
+        queryset = models.LtiTool.objects.filter(Q(canvas_id__isnull=False, canvas_id__in=available_tool_ids)#).order_by('name')
+                                                 | Q(launch_url__isnull=False))\
             .order_by('name')
         serializer = serializers.LtiToolWithNavSerializer(
             queryset, many=True, context={ 'available_tools': available_tools }
