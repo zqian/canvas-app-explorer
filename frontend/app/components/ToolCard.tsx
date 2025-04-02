@@ -12,7 +12,7 @@ import {
 import DataElement from './DataElement';
 import ErrorsDisplay from './ErrorsDisplay';
 import ImageDialog from './ImageDialog';
-import { AddToolButton, RemoveToolButton } from './toolButtons';
+import { AddToolButton, RemoveToolButton, LaunchToolButton } from './toolButtons';
 import { updateToolNav } from '../api';
 import constants from '../constants';
 import { Tool } from '../interfaces';
@@ -130,14 +130,9 @@ export default function ToolCard (props: ToolCardProps) {
           {
             tool.launch_url != null
               ? (
-                <Button
-                  component="a"
-                  href={tool.launch_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Launch
-                </Button>
+                <LaunchToolButton
+                onClick={() => window.open(tool.launch_url, '_blank', 'noopener,noreferrer')}
+                />
               ) : (
               tool.navigation_enabled
                 ? (

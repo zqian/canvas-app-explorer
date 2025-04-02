@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ltitool',
             name='launch_url',
-            field=models.CharField(blank=True, max_length=255, null=True),
+            field=models.CharField(blank=True, max_length=2048, null=True),
         ),
     ]
