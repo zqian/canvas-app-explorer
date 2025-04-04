@@ -7,6 +7,7 @@ class LtiToolAdmin(admin.ModelAdmin):
     fields = (
         'name',
         'canvas_id',
+        'launch_url',
         ('logo_image', 'logo_image_alt_text'),
         ('main_image', 'main_image_alt_text'),
         'short_description',
@@ -15,7 +16,6 @@ class LtiToolAdmin(admin.ModelAdmin):
         'support_resources',
         'canvas_placement',
         'internal_notes',
-        'launch_url',
     )
     list_display = ('name', 'canvas_id')
 

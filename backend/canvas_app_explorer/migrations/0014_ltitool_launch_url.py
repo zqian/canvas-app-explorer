@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='ltitool',
             name='launch_url',
-            field=models.CharField(blank=True, max_length=2048, null=True),
+            field=models.CharField(blank=True, help_text="A link that will directly be launched by clicking on this card. If this is value is set then canvas_id is ignored", max_length=2048, null=True),
         ),
     ]
