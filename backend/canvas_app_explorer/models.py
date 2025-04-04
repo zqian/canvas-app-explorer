@@ -40,6 +40,7 @@ class LtiTool(models.Model):
     support_resources = HTMLField()
     canvas_placement = models.ManyToManyField(CanvasPlacement)
     internal_notes = HTMLField(blank=True, null=True, help_text="a place to put helpful info for admins, not visible to users")
+    launch_url = models.CharField(max_length=2048, blank=True, null=True, help_text="A link that will directly be launched by clicking on this card. If this is value is set then canvas_id is ignored")
 
     def __str__(self):
         return self.name

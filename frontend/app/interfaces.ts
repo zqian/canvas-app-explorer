@@ -26,6 +26,7 @@ interface Tool {
   canvas_placement_expanded: CanvasPlacement[],
   support_resources: string
   navigation_enabled: boolean
+  launch_url: string
 }
 
 export type { Globals, Tool, User };

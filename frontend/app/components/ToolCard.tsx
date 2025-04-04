@@ -12,7 +12,7 @@ import {
 import DataElement from './DataElement';
 import ErrorsDisplay from './ErrorsDisplay';
 import ImageDialog from './ImageDialog';
-import { AddToolButton, RemoveToolButton } from './toolButtons';
+import { AddToolButton, RemoveToolButton, LaunchToolButton } from './toolButtons';
 import { updateToolNav } from '../api';
 import constants from '../constants';
 import { Tool } from '../interfaces';
@@ -128,18 +128,25 @@ export default function ToolCard (props: ToolCardProps) {
             {moreOrLessText}
           </Button>
           {
-            tool.navigation_enabled
+            tool.launch_url != null
               ? (
-                <RemoveToolButton
-                  disabled={updateToolNavLoading}
-                  onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: false })}
+                <LaunchToolButton
+                onClick={() => window.open(tool.launch_url, '_blank', 'noopener,noreferrer')}
                 />
-              )
-              : (
-                <AddToolButton
-                  disabled={updateToolNavLoading}
-                  onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: true })}
-                />
+              ) : (
+              tool.navigation_enabled
+                ? (
+                  <RemoveToolButton
+                    disabled={updateToolNavLoading}
+                    onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: false })}
+                  />
+                )
+                : (
+                  <AddToolButton
+                    disabled={updateToolNavLoading}
+                    onClick={() => doUpdateToolNav({ canvasToolId: tool.canvas_id, navEnabled: true })}
+                  />
+                )
               )
           }
           {
