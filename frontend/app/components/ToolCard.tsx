@@ -129,11 +129,11 @@ export default function ToolCard (props: ToolCardProps) {
           </Button>
           {
             tool.launch_url != null
-            ? (
-              <LaunchToolButton
-              onClick={() => window.open(tool.launch_url, '_blank', 'noopener,noreferrer')}
-              />
-            ) : (
+              ? (
+                <LaunchToolButton
+                onClick={() => window.open(tool.launch_url, '_blank', 'noopener,noreferrer')}
+                />
+              ) : (
               tool.navigation_enabled
                 ? (
                   <RemoveToolButton

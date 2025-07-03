@@ -30,9 +30,6 @@ class LTIToolViewSet(LoggingMixin, viewsets.ViewSet):
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    # Add custom logging if needed
-    logging_methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']  # Only log these methods
-
     # Customize what gets logged
     def handle_log(self):
         """Hook to customize the log entry"""
