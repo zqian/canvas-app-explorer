@@ -23,40 +23,6 @@ logger = logging.getLogger(__name__)
 
 MANAGER_FACTORY = DjangoCourseLtiManagerFactory(f'https://{settings.CANVAS_OAUTH_CANVAS_DOMAIN}')
 
-class UserEventViewSet(LoggingMixin, viewsets.ViewSet):
-    """ViewSet for tracking frontend user events"""
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def create(self, request):
-        """Log frontend events"""
-        event_type = request.data.get('event_type')
-        event_data = request.data.get('event_data', {})
-
-        # The LoggingMixin will automatically log this request
-        extra_data = {
-            'event_type': event_type,
-            'event_data': event_data,
-            'course_id': request.session.get('course_id'),
-        }
-
-        # Update the log with relevant data
-        self.log.update({
-            'requested_at': timezone.now(),
-            'path': self.request.path,
-            'remote_addr': self.request.META.get('REMOTE_ADDR', ''),
-            'host': self.request.META.get('HTTP_HOST', ''),
-            'method': self.request.method,
-            'user_id': getattr(self.request.user, 'id', None),
-            'view': self.__class__.__name__,
-            'view_method': self.request.method,
-            'status_code': status.HTTP_201_CREATED,
-            'query_params': self.request.query_params.dict(),
-            'data': extra_data,
-        })
-
-        return Response(status=status.HTTP_201_CREATED)
-
 class LTIToolViewSet(LoggingMixin, viewsets.ViewSet):
     """
     API endpoint that lists LTI tools available in the course context, and allows for enabling/disabling navigation.

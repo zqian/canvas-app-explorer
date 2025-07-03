@@ -13,7 +13,7 @@ import DataElement from './DataElement';
 import ErrorsDisplay from './ErrorsDisplay';
 import ImageDialog from './ImageDialog';
 import { AddToolButton, RemoveToolButton, LaunchToolButton } from './toolButtons';
-import { updateToolNav, logUserEvent } from '../api';
+import { updateToolNav } from '../api';
 import constants from '../constants';
 import { Tool } from '../interfaces';
 
@@ -25,32 +25,6 @@ interface ToolCardProps {
 }
 
 export default function ToolCard (props: ToolCardProps) {
-  const handleMoreInfoClick = async (tool: Tool) => {
-    try {
-      await logUserEvent('tool_info_toggle', {
-        tool_canvas_id: tool.canvas_id,
-        tool_name: tool.name,
-        action: showMoreInfo ? 'collapse' : 'expand'
-      });
-      setShowMoreInfo(!showMoreInfo);
-    } catch (error) {
-      console.error('Failed to log event:', error);
-    }
-  };
-
-  const handleLaunchClick = async (tool: Tool) => {
-    try {
-      await logUserEvent('tool_launch', {
-        tool_canvas_id: tool.canvas_id,
-        tool_name: tool.name,
-        launch_url: tool.launch_url
-      });
-      window.open(tool.launch_url, '_blank', 'noopener,noreferrer');
-    } catch (error) {
-      console.error('Failed to log launch event:', error);
-    }
-  };
-
   const { tool, onToolUpdate } = props;
 
   const [showMoreInfo, setShowMoreInfo] = useState(false);
@@ -146,7 +120,7 @@ export default function ToolCard (props: ToolCardProps) {
           aria-busy={updateToolNavLoading}
         >
           <Button
-            onClick={() => handleMoreInfoClick(tool)}
+            onClick={() => setShowMoreInfo(!showMoreInfo)}
             aria-expanded={showMoreInfo}
             aria-label={`Show ${moreOrLessText} Info`}
             startIcon={!showMoreInfo ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -157,7 +131,7 @@ export default function ToolCard (props: ToolCardProps) {
             tool.launch_url != null
             ? (
               <LaunchToolButton
-                onClick={() => handleLaunchClick(tool)}
+              onClick={() => window.open(tool.launch_url, '_blank', 'noopener,noreferrer')}
               />
             ) : (
               tool.navigation_enabled
