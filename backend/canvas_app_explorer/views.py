@@ -12,17 +12,30 @@ from backend.canvas_app_explorer import models, serializers
 from backend.canvas_app_explorer.canvas_lti_manager.django_factory import DjangoCourseLtiManagerFactory
 from backend.canvas_app_explorer.canvas_lti_manager.exception import CanvasHTTPError
 
+from rest_framework_tracking.models import APIRequestLog
+from rest_framework_tracking.mixins import LoggingMixin
+
 logger = logging.getLogger(__name__)
 
 MANAGER_FACTORY = DjangoCourseLtiManagerFactory(f'https://{settings.CANVAS_OAUTH_CANVAS_DOMAIN}')
 
-
-class LTIToolViewSet(viewsets.ViewSet):
+class LTIToolViewSet(LoggingMixin, viewsets.ViewSet):
     """
     API endpoint that lists LTI tools available in the course context, and allows for enabling/disabling navigation.
     """
     authentication_classes = [authentication.SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
+    # Customize what gets logged
+    def handle_log(self):
+        # save extra course_id data in the log entry
+        extra_data = {
+            'course_id': self.request.session.get('course_id'),
+        }
+        log_entry = APIRequestLog(**self.log)
+        log_entry.data = extra_data
+        log_entry.save()
+
 
     lookup_url_kwarg = 'canvas_id'
 
