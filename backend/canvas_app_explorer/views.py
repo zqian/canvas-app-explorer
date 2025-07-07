@@ -14,10 +14,6 @@ from backend.canvas_app_explorer.canvas_lti_manager.exception import CanvasHTTPE
 
 from rest_framework_tracking.models import APIRequestLog
 from rest_framework_tracking.mixins import LoggingMixin
-from django.utils import timezone
-from django.db import transaction
-
-
 
 logger = logging.getLogger(__name__)
 
