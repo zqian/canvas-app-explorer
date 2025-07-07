@@ -217,12 +217,12 @@ LOGGING = {
         },
         'rest_framework_tracking': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },# ...existing code...
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
     }

@@ -32,38 +32,13 @@ class LTIToolViewSet(LoggingMixin, viewsets.ViewSet):
 
     # Customize what gets logged
     def handle_log(self):
-        """Hook to customize the log entry"""
-        logger.info("Logging API request...")
-
-        # Extract extra_data separately since it's handled differently
+        # save extra course_id data in the log entry
         extra_data = {
-            'custom_field': 'custom_value',
             'course_id': self.request.session.get('course_id'),
         }
-
-        # Get response and status_code safely
-        response = getattr(self, 'response', None)
-        status_code = response.status_code if response else None
-
-        # Update the log with standard fields
-        self.log.update({
-            'requested_at': timezone.now(),
-            'remote_addr': self.request.META.get('REMOTE_ADDR', ''),
-            'host': self.request.META.get('HTTP_HOST', ''),
-            'method': self.request.method,
-            'user_id': getattr(self.request.user, 'id', None),
-            'view': self.__class__.__name__,
-            'view_method': self.request.method,
-            'path': self.request.path,
-            'status_code': status_code
-        })
-
-        # Create and save the log entry
         log_entry = APIRequestLog(**self.log)
         log_entry.data = extra_data
         log_entry.save()
-
-        logger.info(f"Logging completed for user {self.request.user.id} in course {self.request.session.get('course_id')}")
 
 
     lookup_url_kwarg = 'canvas_id'
