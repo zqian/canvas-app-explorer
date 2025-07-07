@@ -6,6 +6,7 @@ import { ThemeProvider } from '@mui/material';
 import Home from './components/Home';
 import { Globals } from './interfaces';
 import theme from './theme';
+import { ConsentManagerProvider } from './components/ConsentManagerProvider';
 
 const globalsId = 'cae_globals';
 const globalsEl = document.getElementById(globalsId);
@@ -31,7 +32,9 @@ const root = createRoot(container);
 root.render(
   <QueryClientProvider client={queryClient}>
     <ThemeProvider theme={theme}>
-      <Home globals={globals} />
+      <ConsentManagerProvider globals = {globals}>
+        <Home globals={globals} />
+      </ConsentManagerProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

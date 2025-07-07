@@ -5,7 +5,10 @@ interface User {
 
 interface Globals {
   user: User | null
+  course_id: number
   help_url: string
+  google_analytics_id: string
+  um_consent_manager_script_domain: string
 }
 
 interface CanvasPlacement {
