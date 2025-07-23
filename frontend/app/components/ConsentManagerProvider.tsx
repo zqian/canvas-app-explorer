@@ -29,6 +29,7 @@ interface UmConsentManagerConfig {
     };
   }
   privacyUrl: string | false;
+  externalLinkBlank: boolean;
   googleAnalyticsID: string | false;
   cookies: {
     necessary: Array<{ name: string; domain: string; regex: string }>;
@@ -50,6 +51,7 @@ interface ConsentManagerProviderProps {
   rootDomain?: string; // e.g., 'ngrok-free.app' for local testing
   mode?: 'prod' | 'dev';
   privacyUrl?: string | false;
+  externalLinkBlank?: boolean; // open privacy link in a new tab
 }
 
 export function ConsentManagerProvider({
@@ -58,12 +60,18 @@ export function ConsentManagerProvider({
   alwaysShow = false,
   rootDomain = '',
   mode = 'prod',
-  privacyUrl = false
+  privacyUrl = false,
+  externalLinkBlank = true
 }: ConsentManagerProviderProps) {
   const { 
     um_consent_manager_script_domain: consentManagerScriptUrl, 
     google_analytics_id: googleAnalyticsID,
-    course_id
+    course_id,
+    course_name,
+    term_id,
+    term_name,
+    account_id,
+    account_name
   } = globals;
 
   const [analyticsConsentGiven, setAnalyticsConsentGiven] = useState<boolean | null>(null);
@@ -102,6 +110,7 @@ export function ConsentManagerProvider({
         streamConfig: { cookie_flags: 'SameSite=None; Secure' }
       },
       privacyUrl: privacyUrl,
+      externalLinkBlank: externalLinkBlank,
       googleAnalyticsID: googleAnalyticsID,
       cookies: {
         necessary: [],
@@ -131,11 +140,18 @@ export function ConsentManagerProvider({
       }
     };
 
-  }, [handleConsentChange, googleAnalyticsID, consentManagerScriptUrl, alwaysShow, rootDomain, mode, privacyUrl]);
+  }, [handleConsentChange, googleAnalyticsID, consentManagerScriptUrl, alwaysShow, rootDomain, mode, privacyUrl, externalLinkBlank]);
 
   const contextValue: AnalyticsConsentContextType = {
     analyticsConsentGiven: analyticsConsentGiven,
-    courseIdForEvents: course_id
+    eventInfo: {
+      courseId: course_id,
+      courseName: course_name,
+      termId: term_id,
+      termName: term_name,
+      accountId: account_id,
+      accountName: account_name
+    }
   };
   
   return (
