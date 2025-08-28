@@ -79,7 +79,7 @@ function Home (props: HomeProps) {
         {
           filteredTools.length > 0
             ? filteredTools.map(t => (
-              <Grid item key={t.canvas_id}><ToolCard tool={t} onToolUpdate={onToolUpdate} /></Grid>
+              <Grid item key={t.id}><ToolCard tool={t} onToolUpdate={onToolUpdate} /></Grid>
             ))
             : <Grid item><Alert severity='info'>No matching results</Alert></Grid>
         }
