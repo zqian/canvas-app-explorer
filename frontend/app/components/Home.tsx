@@ -47,7 +47,7 @@ function Home (props: HomeProps) {
     */
     setTools((oldTools) => {
       if (oldTools === undefined) throw Error('Expected tools variable to be defined!');
-      const newTools = oldTools.map(t => t.canvas_id === newTool.canvas_id ? newTool : t);
+      const newTools = oldTools.map(t => t.id === newTool.id ? newTool : t);
       return newTools;
     });
 
