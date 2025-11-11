@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Box, Grid, LinearProgress, Snackbar, Typography } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -8,7 +8,7 @@ import HeaderAppBar from './HeaderAppBar';
 import ToolCard from './ToolCard';
 import { getTools } from '../api';
 import constants from '../constants';
-import '../css/Home.css';
+import '../css/ToolsHome.css';
 import { Globals, Tool } from '../interfaces';
 
 const MainContainer = styled('div')(({ theme }) => ({
@@ -25,20 +25,29 @@ const filterTools = (tools: Tool[], filter: string): Tool[] => {
   );
 };
 
-interface HomeProps {
+interface ToolsHomeProps {
   globals: Globals
 }
 
-function Home (props: HomeProps) {
+function ToolsHome (props: ToolsHomeProps) {
   const { globals } = props;
 
   const [tools, setTools] = useState<undefined | Tool[]>(undefined);
   const [searchFilter, setSearchFilter] = useState('');
   const [showRefreshAlert, setShowRefreshAlert] = useState<undefined | boolean>(undefined);
 
-  const { isLoading: getToolsLoading, error: getToolsError } = useQuery(['getTools'], getTools, {
-    onSuccess: (data) => setTools(data)
+  const { isLoading: isGetToolsLoading, error: getToolsError, data: getToolsData} = useQuery({
+    queryKey: ['getTools'], 
+    queryFn: async () => {
+      return await getTools();
+    },
   });
+
+  useEffect(() => {
+    if (getToolsData) {
+      setTools(getToolsData);
+    }
+  }, [getToolsData]);
 
   const onToolUpdate = (newTool: Tool) => {
     /*
@@ -56,7 +65,7 @@ function Home (props: HomeProps) {
 
   const handleRefreshAlertClose = () => setShowRefreshAlert(false);
 
-  const isLoading = getToolsLoading;
+  const isLoading = isGetToolsLoading;
   const errors = [getToolsError].filter(e => e !== null) as Error[];
 
   let feedbackBlock;
@@ -100,7 +109,7 @@ function Home (props: HomeProps) {
             <Typography aria-live='polite' aria-atomic>{toolNumString} tools displayed</Typography>
           </Grid>
         </Grid>
-        <div aria-describedby='tool-card-container-loading' aria-busy={getToolsLoading}>
+        <div aria-describedby='tool-card-container-loading' aria-busy={isGetToolsLoading}>
           {toolCardContainer}
         </div>
       </MainContainer>
@@ -116,4 +125,4 @@ function Home (props: HomeProps) {
   );
 }
 
-export default Home;
+export default ToolsHome;

@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-import { Tool } from './interfaces';
+import { SyncTask, Tool } from './interfaces';
 
 const API_BASE = '/api';
 const JSON_MIME_TYPE = 'application/json';
@@ -74,4 +74,30 @@ async function updateToolNav (data: UpdateToolNavData): Promise<void> {
   return;
 }
 
-export { getTools, updateToolNav };
+interface UpdateAltTextStartSyncData {
+  courseId: number
+}
+
+async function updateAltTextStartSync(data: UpdateAltTextStartSyncData): Promise<SyncTask> {
+  const { courseId } = data;
+  const body = { course_id: courseId };
+  const url = `${API_BASE}/alt-text/scan/`;
+  const requestInit: RequestInit = {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      ...BASE_MUTATION_HEADERS,
+      'X-CSRFTOKEN': getCSRFToken() ?? ''
+    }
+  };
+  const res = await fetch(url, requestInit);
+  if (!res.ok) {
+    console.error(res);
+    throw new Error(await createErrorMessage(res));
+  }
+  const resData:string = await res.json();
+  console.log(resData);
+  return { id: resData };
+}
+
+export { getTools, updateToolNav, updateAltTextStartSync };
