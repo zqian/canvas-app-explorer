@@ -72,6 +72,7 @@ async def get_courses_images(course: Course):
     results = await asyncio.gather(
         fetch_content_items_async(get_assignments, course),
         fetch_content_items_async(get_pages, course),
+        fetch_content_items_async(get_quizzes, course),
         return_exceptions=True,
     )
     logger.debug("raw results from gather: %s", results)
@@ -79,7 +80,7 @@ async def get_courses_images(course: Course):
     
 def unpack_and_store_content_images(results, course: Course):
      # unpack results (assignments, pages) and handle exceptions returned by gather. gather maintain call order
-    assignments, pages = results
+    assignments, pages, quizzes = results
 
     error_when_fetching_images = False
     if isinstance(assignments, Exception):
@@ -90,13 +91,17 @@ def unpack_and_store_content_images(results, course: Course):
         logger.error("Error occurred fetching pages: %s", pages)
         error_when_fetching_images = True
         pages = []
+    if isinstance(quizzes, Exception):
+        logger.error("Error occurred fetching quizzes: %s", quizzes)
+        error_when_fetching_images = True
+        quizzes = []
     
     if error_when_fetching_images:
         # DB call would be needed to update CourseScan status to 'failed' here. 
         update_course_scan(course.id, CourseScanStatus.FAILED.value)
         return
     
-    combined = assignments + pages
+    combined = assignments + pages + quizzes
     logger.debug("Combined items count: %s", combined)
     # Filter to only those content with images with alt text
     filtered_content_with_images = [
@@ -173,7 +178,7 @@ async def fetch_content_items_async(fn, course: Course):
     """
     Generic async wrapper that runs the synchronous `fn(course)` in a thread and
     returns a list (or empty list on error). `fn` should be a callable like
-    `get_assignments` or `get_pages` that accepts a Course and returns a list.
+    `get_assignments`, `get_pages`, or `get_quizzes` that accepts a Course and returns a list.
     """
     try:
         return await asyncio.to_thread(fn, course)
@@ -192,6 +197,12 @@ def get_assignments(course: Course):
         logger.info(f"Fetched {len(assignments)} assignments.")
         images_from_assignments = []
         for assignment in assignments:
+            # Use getattr to safely check for quiz_id attribute
+            quiz_id = getattr(assignment, 'quiz_id', None)
+            if quiz_id:
+                # skip quiz assignments since quizzes are fetched separately
+                logger.info(f"Skipping quiz assignment ID: {assignment.id}")
+                continue
             logger.info(f"Assignment ID: {assignment.id}, Name: {assignment.name}")
             images_from_assignments.append(
                 {'id': assignment.id, 
@@ -223,6 +234,40 @@ def get_pages(course: Course):
                  'images': extract_images_from_html(page.body), 
                  'type': 'page'})
         return images_from_pages
+    except (CanvasException, Exception) as e:
+        logger.error(f"Errorss fetching pages for course {course.id}: {e}")
+        raise e
+
+
+def get_quizzes(course: Course):
+    """
+    Synchronously fetches quizzes for a given course using canvas_api.get_quizzes().
+    """
+    try:
+        logger.info(f"Fetching quizzes for course {course.id}.")
+        quizzes = list(course.get_quizzes(per_page=PER_PAGE))
+
+        logger.info(f"Fetched {len(quizzes)} quizzes.")
+        images_from_quizzes = []
+        for quiz in quizzes:
+            quiz_content = getattr(quiz, 'description', '')
+            images_from_quizzes.append(
+                {'id': quiz.id,
+                 'name': quiz.title,
+                 'images': extract_images_from_html(quiz_content),
+                 'type': 'quiz'})
+            # get questions
+            quiz_questions = quiz.get_questions()
+            for question in quiz_questions:
+                question_text = getattr(question, 'question_text', '')
+                logger.info(f"Quiz ID: {quiz.id}, Question ID: {question.id}, Question Type: {question.question_type} question text: {question_text}")
+
+                images_from_quizzes.append(
+                    {'id': f"{question.id}",
+                     'name': f"Quiz {quiz.id} - Question {question.id}",
+                     'images': extract_images_from_html(question_text),
+                     'type': 'quiz_question'})
+        return images_from_quizzes
     except (CanvasException, Exception) as e:
         logger.error(f"Errorss fetching pages for course {course.id}: {e}")
         raise e
