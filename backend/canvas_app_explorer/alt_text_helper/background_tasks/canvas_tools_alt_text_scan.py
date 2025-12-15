@@ -157,7 +157,9 @@ def save_scan_results(course_id: int, items: List[Dict[str, Any]]):
                     course_id=course_id,
                     content_type=item['type'],
                     content_id=item['id'],
-                    content_name=item['name']
+                    content_name=item['name'],
+                    quiz_assignment_id=item.get('quiz_assignment_id'),
+                    parent_quiz_id=item.get('parent_quiz_id')
                 )
                 
                 for img in item['images']:
@@ -201,14 +203,16 @@ def get_assignments(course: Course):
             quiz_id = getattr(assignment, 'quiz_id', None)
             if quiz_id:
                 # skip quiz assignments since quizzes are fetched separately
-                logger.info(f"Skipping quiz assignment ID: {assignment.id}")
+                logger.debug(f"Skipping quiz assignment ID: {assignment.id}")
                 continue
             logger.info(f"Assignment ID: {assignment.id}, Name: {assignment.name}")
             images_from_assignments.append(
                 {'id': assignment.id, 
                  'name': assignment.name, 
                  'images': extract_images_from_html(assignment.description), 
-                 'type': 'assignment' })
+                 'type': 'assignment',
+                 'quiz_assignment_id': None,
+                 'parent_quiz_id': None})
         return images_from_assignments
     except (CanvasException, Exception) as e:
         logger.error(f"Error fetching assignments for course {course.id}: {e}")
@@ -232,7 +236,9 @@ def get_pages(course: Course):
                 {'id': page.page_id, 
                  'name': page.title, 
                  'images': extract_images_from_html(page.body), 
-                 'type': 'page'})
+                 'type': 'page',
+                 'quiz_assignment_id': None,
+                 'parent_quiz_id': None})
         return images_from_pages
     except (CanvasException, Exception) as e:
         logger.error(f"Errorss fetching pages for course {course.id}: {e}")
@@ -244,10 +250,9 @@ def get_quizzes(course: Course):
     Synchronously fetches quizzes for a given course using canvas_api.get_quizzes().
     """
     try:
-        logger.info(f"Fetching quizzes for course {course.id}.")
+        logger.debug(f"Fetching quizzes for course {course.id}.")
         quizzes = list(course.get_quizzes(per_page=PER_PAGE))
 
-        logger.info(f"Fetched {len(quizzes)} quizzes.")
         images_from_quizzes = []
         for quiz in quizzes:
             quiz_content = getattr(quiz, 'description', '')
@@ -255,18 +260,23 @@ def get_quizzes(course: Course):
                 {'id': quiz.id,
                  'name': quiz.title,
                  'images': extract_images_from_html(quiz_content),
-                 'type': 'quiz'})
+                 'type': 'quiz',
+                 'quiz_assignment_id': quiz.assignment_id if hasattr(quiz, 'assignment_id') else None,
+                 'parent_quiz_id': None})
             # get questions
             quiz_questions = quiz.get_questions()
             for question in quiz_questions:
+
                 question_text = getattr(question, 'question_text', '')
-                logger.info(f"Quiz ID: {quiz.id}, Question ID: {question.id}, Question Type: {question.question_type} question text: {question_text}")
+                logger.debug(f"Quiz ID: {quiz.id}, Question ID: {question.id}, Question Type: {question.question_type} question text: {question_text}")
 
                 images_from_quizzes.append(
                     {'id': f"{question.id}",
-                     'name': f"Quiz {quiz.id} - Question {question.id}",
+                     'name': '',
                      'images': extract_images_from_html(question_text),
-                     'type': 'quiz_question'})
+                     'type': 'quiz_question',
+                     'quiz_assignment_id': quiz.assignment_id if hasattr(quiz, 'assignment_id') else None,
+                     'parent_quiz_id': quiz.id})
         return images_from_quizzes
     except (CanvasException, Exception) as e:
         logger.error(f"Errorss fetching pages for course {course.id}: {e}")
