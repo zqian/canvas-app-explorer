@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 
-import { SyncTask, Tool } from './interfaces';
+import { SyncTask, Tool, ToolCategory} from './interfaces';
 
 const API_BASE = '/api';
 const JSON_MIME_TYPE = 'application/json';
@@ -74,7 +74,18 @@ async function updateToolNav (data: UpdateToolNavData): Promise<void> {
   return;
 }
 
-interface UpdateAltTextStartSyncData {
+async function getCategories (): Promise<ToolCategory[]> {
+  const url = `${API_BASE}/tool_categories/`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    console.error(res);
+    throw new Error(await createErrorMessage(res));
+  }
+  const data: ToolCategory[] = await res.json();
+  return data;
+}
+
+  interface UpdateAltTextStartSyncData {
   courseId: number
 }
 
@@ -99,4 +110,4 @@ async function updateAltTextStartSync(data: UpdateAltTextStartSyncData): Promise
   return resData;
 }
 
-export { getTools, updateToolNav, updateAltTextStartSync };
+export { getTools, updateToolNav, getCategories, updateAltTextStartSync};
