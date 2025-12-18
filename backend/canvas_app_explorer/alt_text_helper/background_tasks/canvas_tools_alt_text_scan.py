@@ -260,7 +260,7 @@ def get_quizzes(course: Course):
                  'type': 'quiz',
                  'content_parent_id': None})
             # get questions
-            quiz_questions = quiz.get_questions()
+            quiz_questions = quiz.get_questions(per_page=PER_PAGE)
             for question in quiz_questions:
 
                 question_text = getattr(question, 'question_text', '')
