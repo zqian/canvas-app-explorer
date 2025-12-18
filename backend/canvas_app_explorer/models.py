@@ -113,16 +113,14 @@ class ContentItem(models.Model):
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPE_CHOICES)
     content_id = models.BigIntegerField(unique=True)
     content_name = models.CharField(max_length=255, null=True, blank=True)
-    # for quiz associated with assignment
-    quiz_assignment_id = models.BigIntegerField(null=True, blank=True)
     # for quiz question
-    parent_quiz_id = models.BigIntegerField(null=True, blank=True)
+    content_parent_id = models.BigIntegerField(null=True, blank=True)
 
     class Meta:
         db_table = 'canvas_app_explorer_content_item'
 
     def __str__(self):
-        return f"ContentItem(id={self.id}, course_id={self.course_id}, type={self.content_type}, content_name={self.content_name}, quiz_assignment_id={self.quiz_assignment_id}, parent_quiz_id={self.parent_quiz_id})"
+        return f"ContentItem(id={self.id}, course_id={self.course_id}, type={self.content_type}, content_name={self.content_name}, content_parent_id={self.content_parent_id})"
 
 
 class ImageItem(models.Model):

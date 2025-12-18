@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('canvas_app_explorer', '0014_ltitool_launch_url'),
+        ('canvas_app_explorer', '0015_contentitem_coursescan_imageitem_contentitem_course'),
     ]
 
     operations = [

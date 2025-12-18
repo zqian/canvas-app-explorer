@@ -158,8 +158,7 @@ def save_scan_results(course_id: int, items: List[Dict[str, Any]]):
                     content_type=item['type'],
                     content_id=item['id'],
                     content_name=item['name'],
-                    quiz_assignment_id=item.get('quiz_assignment_id'),
-                    parent_quiz_id=item.get('parent_quiz_id')
+                    content_parent_id=item.get('content_parent_id')
                 )
                 
                 for img in item['images']:
@@ -211,8 +210,7 @@ def get_assignments(course: Course):
                  'name': assignment.name, 
                  'images': extract_images_from_html(assignment.description), 
                  'type': 'assignment',
-                 'quiz_assignment_id': None,
-                 'parent_quiz_id': None})
+                 'content_parent_id': None})
         return images_from_assignments
     except (CanvasException, Exception) as e:
         logger.error(f"Error fetching assignments for course {course.id}: {e}")
@@ -237,8 +235,7 @@ def get_pages(course: Course):
                  'name': page.title, 
                  'images': extract_images_from_html(page.body), 
                  'type': 'page',
-                 'quiz_assignment_id': None,
-                 'parent_quiz_id': None})
+                 'content_parent_id': None})
         return images_from_pages
     except (CanvasException, Exception) as e:
         logger.error(f"Errorss fetching pages for course {course.id}: {e}")
@@ -261,8 +258,7 @@ def get_quizzes(course: Course):
                  'name': quiz.title,
                  'images': extract_images_from_html(quiz_content),
                  'type': 'quiz',
-                 'quiz_assignment_id': quiz.assignment_id if hasattr(quiz, 'assignment_id') else None,
-                 'parent_quiz_id': None})
+                 'content_parent_id': None})
             # get questions
             quiz_questions = quiz.get_questions()
             for question in quiz_questions:
@@ -275,8 +271,7 @@ def get_quizzes(course: Course):
                      'name': '',
                      'images': extract_images_from_html(question_text),
                      'type': 'quiz_question',
-                     'quiz_assignment_id': quiz.assignment_id if hasattr(quiz, 'assignment_id') else None,
-                     'parent_quiz_id': quiz.id})
+                     'content_parent_id': quiz.id})
         return images_from_quizzes
     except (CanvasException, Exception) as e:
         logger.error(f"Errorss fetching pages for course {course.id}: {e}")
