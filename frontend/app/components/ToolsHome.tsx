@@ -7,7 +7,7 @@ import ErrorsDisplay from './ErrorsDisplay';
 import HeaderAppBar from './HeaderAppBar';
 import ToolCard from './ToolCard';
 import { getTools } from '../api';
-import constants from '../constants';
+import  { TOOL_MENU_NAME } from '../constants';
 import '../css/ToolsHome.css';
 import { Globals, Tool, ToolFiltersState } from '../interfaces';
 import ToolFilters from './ToolFilters';
@@ -51,6 +51,9 @@ function ToolsHome (props: ToolsHomeProps) {
   const [showRefreshAlert, setShowRefreshAlert] = useState<undefined | boolean>(undefined);
 
   const { isLoading: isGetToolsLoading, error: getToolsError, data: getToolsData} = useQuery({
+    retry: false,
+    retryOnMount: false,
+    staleTime: Infinity,
     queryKey: ['getTools'], 
     queryFn: async () => {
       return await getTools();
@@ -113,10 +116,9 @@ function ToolsHome (props: ToolsHomeProps) {
 
   return (
     <div id='root'>
-      <HeaderAppBar 
-        user={globals.user} 
+      <HeaderAppBar
+        user={globals.user}
         helpURL={globals.help_url}
-        onSearchFilterChange={(v:string) => setToolFiltersState(filters => ({...filters, search: v }))}
       />
       <MainContainer>
         <Typography variant='h6' component='h2' sx={{ textAlign: 'center', marginBottom: 3 }}>
@@ -167,7 +169,7 @@ function ToolsHome (props: ToolsHomeProps) {
       </Typography>
       <Snackbar open={showRefreshAlert} onClose={handleRefreshAlertClose} autoHideDuration={10000}>
         <Alert severity='info' elevation={2} onClose={handleRefreshAlertClose}>
-          Refresh the page to update the tool&apos;s appearance in the {constants.toolMenuName}.
+          Refresh the page to update the tool&apos;s appearance in the {TOOL_MENU_NAME}.
         </Alert>
       </Snackbar>
     </div>
