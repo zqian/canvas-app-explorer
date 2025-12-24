@@ -196,7 +196,6 @@ def get_assignments(course: Course):
     """
     try:
         logger.info(f"Fetching assignments for course {course.id}.")
-        # raise ResourceDoesNotExist('Mocking quiz questions ResourceDoesNotExist')
         assignments = list(course.get_assignments(per_page=PER_PAGE))
         logger.debug(f"Fetched {len(assignments)} assignments.")
         images_from_assignments = []
@@ -227,7 +226,6 @@ def get_pages(course: Course):
     """
     try:
         logger.info(f"Fetching pages for course {course.id}.")
-        # raise ResourceDoesNotExist('Mocking quiz questions ResourceDoesNotExist')
         pages = list(course.get_pages(include=['body'], per_page=PER_PAGE))
 
         logger.debug(f"Fetched {len(pages)} pages.")
@@ -254,7 +252,6 @@ def get_quizzes(course: Course):
     """
     try:
         logger.info(f"Fetching quizzes for course {course.id}.")
-        # raise ResourceDoesNotExist('Mocking quiz questions ResourceDoesNotExist')
         quizzes: List[Quiz] = list(course.get_quizzes(per_page=PER_PAGE))
 
         images_from_quizzes = []
@@ -299,9 +296,6 @@ def get_quiz_questions_sync(quiz: Quiz):
     logger.info(f"Fetching questions for quiz ID: {quiz.id}, Title: {quiz.title}")
     questions_results = []
     try:
-        # if quiz.id == 466202:
-        #     raise ResourceDoesNotExist('Mocking quiz questions ResourceDoesNotExist')
-        # raise ResourceDoesNotExist('Mocking quiz questions ResourceDoesNotExist')
         question = quiz.get_questions(per_page=PER_PAGE)
         for question in question:
             question_text = getattr(question, 'question_text', '')
