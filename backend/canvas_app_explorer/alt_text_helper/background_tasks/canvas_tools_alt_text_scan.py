@@ -207,20 +207,19 @@ def get_assignments(course: Course):
                 logger.debug(f"Skipping quiz assignment ID: {assignment.id}")
                 continue
             logger.info(f"Assignment ID: {assignment.id}, Name: {assignment.name}")
-            assignment_images = extract_images_from_html(assignment.description)
-            if len(assignment_images) > 0:
-                images_from_assignments.append({
-                    'id': assignment.id,
-                    'name': assignment.name,
-                    'images': assignment_images,
-                    'type': 'assignment',
-                    'content_parent_id': None
-                    })
+
+            # Extract images from assignment description
+            images_from_assignments = append_image_items(
+                images_from_assignments,
+                assignment.id,
+                assignment.name,
+                extract_images_from_html(assignment.description),
+                'assignment',
+                None)
         return images_from_assignments
     except (CanvasException, Exception) as e:
         logger.error(f"Error fetching assignments for course {course.id}: {e}")
         raise e
- 
  
 def get_pages(course: Course):
     """
@@ -235,18 +234,17 @@ def get_pages(course: Course):
             logger.info(f"Page ID: {page.page_id}, Title: {page.title}")
         images_from_pages = []
         for page in pages:
-            page_images = extract_images_from_html(page.body)
-            if len(page_images) > 0:
-                images_from_pages.append({
-                    'id': page.page_id,
-                    'name': page.title,
-                    'images': page_images,
-                    'type': 'page',
-                    'content_parent_id': None
-                    })
+            # Extract images from page body
+            images_from_pages = append_image_items(
+                images_from_pages,
+                page.page_id,
+                page.title,
+                extract_images_from_html(page.body),
+                'page',
+                None)
         return images_from_pages
     except (CanvasException, Exception) as e:
-        logger.error(f"Errorss fetching pages for course {course.id}: {e}")
+        logger.error(f"Error fetching pages for course {course.id}: {e}")
         raise e
 
 
@@ -260,15 +258,15 @@ def get_quizzes(course: Course):
 
         images_from_quizzes = []
         for quiz in quizzes:
-            quiz_content = getattr(quiz, 'description', '')
-            quiz_images = extract_images_from_html(quiz_content)
-            if len(quiz_images) > 0:
-                images_from_quizzes.append(
-                    {'id': quiz.id,
-                    'name': quiz.title,
-                    'images': quiz_images,
-                    'type': 'quiz',
-                    'content_parent_id': None})
+            # Extract images from quiz description
+            images_from_quizzes = append_image_items(
+                images_from_quizzes,
+                quiz.id,
+                quiz.title,
+                extract_images_from_html(getattr(quiz, 'description', '')),
+                'quiz',
+                None)
+
         quiz_question_results = get_quiz_questions(quizzes)
         return process_quiz_with_questions(images_from_quizzes, quiz_question_results)
     except (CanvasException, Exception) as e:
@@ -300,22 +298,20 @@ async def get_quiz_questions(quizzes: List[Quiz]):
 
 def get_quiz_questions_sync(quiz: Quiz):
     logger.info(f"Fetching questions for quiz ID: {quiz.id}, Title: {quiz.title}")
-    questions_results = []
+    images_from_questions = []
     try:
         question = quiz.get_questions(per_page=PER_PAGE)
         for question in question:
-            question_text = getattr(question, 'question_text', '')
-            logger.info(f"Quiz : {quiz.title}, Question: {question.question_name}")
-            question_images = extract_images_from_html(question_text)
-            if len(question_images) > 0:
-                questions_results.append({
-                        'id': question.id,
-                        'name': question.question_name,
-                        'images': question_images,
-                        'type': 'quiz_question',
-                        'content_parent_id': quiz.id
-                        })
-        return questions_results
+            # Extract images from quiz question text
+            images_from_questions = append_image_items(
+                images_from_questions,
+                question.id,
+                question.question_name,
+                extract_images_from_html(getattr(question, 'question_text', '')),
+                'quiz_question',
+                quiz.id)
+
+        return images_from_questions
     except (CanvasException, Exception) as e:
         logger.error(f"Errors fetching quiz {quiz.id}:{quiz.title} questions due {e}")
         raise e
@@ -390,3 +386,22 @@ def extract_images_from_html(html_content: str) -> List[Dict[str, Any]]:
     logger.info(images_found)
     return images_found
 
+# Helper function to append image items if images exist
+def append_image_items(
+        images_list: List[Dict[str, Any]],
+        content_id: int,
+        content_name: str,
+        images: List[Dict[str, Any]],
+        content_type: str,
+        content_parent_id: Optional[int]) -> List[Dict[str, Any]]:
+
+    # check if images list is not empty before appending
+    if len(images) > 0:
+        images_list.append({
+            'id': content_id,
+            'name': content_name,
+            'images': images,
+            'type': content_type,
+            'content_parent_id': content_parent_id
+            })
+    return images_list
