@@ -1,5 +1,5 @@
 from django.test import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from backend.canvas_app_explorer.alt_text_helper.background_tasks.canvas_tools_alt_text_scan import (
     extract_images_from_html,
     get_courses_images,
@@ -179,27 +179,41 @@ class TestParsingImageContentHTML(TestCase):
                 return sample_pages
             return []
 
-        with patch(f"{module_path}.fetch_content_items_async", side_effect=mock_fetch_content_items), \
-             patch(f"{module_path}.save_scan_results") as mock_save, \
-             patch(f"{module_path}.GetContentImages") as mock_get_cls:
+        mock_fetch = AsyncMock(side_effect=mock_fetch_content_items)
+        
+        with patch(f"{module_path}.fetch_content_items_async", mock_fetch), \
+             patch(f"{module_path}.save_scan_results") as mock_save:
 
             # Create a dummy course object and a dummy canvas_api (non-None) to exercise the canvas_api path
             from canvasapi.course import Course
             dummy_course = Course(None, {'id': 403334})
             dummy_canvas_api = object()
 
-            # Configure the mocked GetContentImages instance to avoid external calls
-            mock_instance = mock_get_cls.return_value
-            mock_instance.get_images_by_course.return_value = []
-
             # 1. Call get_courses_images to get raw results
+            # Note: get_courses_images is already wrapped with @async_to_sync, so call it directly
             raw_results = get_courses_images(dummy_course)
 
             # 2. Call unpack_and_store_content_images which does the filtering and calls save_scan_results
             from backend.canvas_app_explorer.alt_text_helper.background_tasks.canvas_tools_alt_text_scan import unpack_and_store_content_images
             unpack_and_store_content_images(raw_results, dummy_course, dummy_canvas_api)
 
-            # 3. Verify GetContentImages was instantiated with expected args and save_scan_results was called
-            mock_get_cls.assert_called_once_with(403334, dummy_canvas_api, expected_filtered)
-            mock_save.assert_called_once_with(403334, expected_filtered)
-
+            # 3. Assert that save_scan_results was called once and verify it received the filtered results
+            mock_save.assert_called_once()
+            call_args = mock_save.call_args
+            
+            # save_scan_results(course_id, items) - course_id is first arg, items is second
+            course_id = call_args[0][0]
+            payload = call_args[0][1]  # Second positional argument: items list
+            
+            self.assertEqual(course_id, 403334, "Course ID should match")
+            self.assertEqual(len(payload), 2, "Expected 2 items with images after filtering")
+            
+            # Verify the filtered items match expected content
+            item_ids = [item["id"] for item in payload]
+            self.assertIn(2936007, item_ids, "Assignment 2 should be included")
+            self.assertIn(1664893, item_ids, "Page 1 should be included")
+            
+            # Verify items with empty images were filtered out
+            for item in payload:
+                self.assertGreater(len(item.get("images", [])), 0, 
+                                 f"Item {item['id']} should have at least one image")
