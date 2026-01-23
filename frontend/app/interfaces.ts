@@ -84,13 +84,44 @@ interface ContentImage {
   image_alt_text: string | null
 }
 
-interface ContentItemResponse {
+interface ContentItem {
   content_id: number
-  content_name: string
+  content_name: string | null
   content_parent_id: number | null
   content_type: string
   images: ContentImage[]
 }
 
+interface ContentImageEnriched extends ContentImage {
+  content_id: number
+  content_name: string | null
+  content_parent_id: number | null
+  content_type: string
+}
+
+
+type ActionType = 'approve' | 'skip' | 'unreviewed';
+interface ContentImageReviewState {
+  action: ActionType;
+  altText: string;
+  isDirty: boolean;
+}
+
+interface ContentReviewRequestImageAction {
+  image_url: string
+  image_id: string
+  action: 'approve' | 'skip'
+  approved_alt_text: string
+}
+interface ContentReviewRequest {
+  content_id: number
+  content_name: string | null
+  content_parent_id: number | null
+  content_type: string
+  images: ContentReviewRequestImageAction[]
+}
+
 export type { Globals, Tool, User, ToolCategory, ToolFiltersState, 
-  AltTextScan, AltTextLastScanDetail, AltTextLastScanCourseContentItem, ContentImage, ContentItemResponse };
+  AltTextScan, AltTextLastScanDetail, AltTextLastScanCourseContentItem, 
+  ContentImage, ContentItem, ContentImageEnriched, ActionType, ContentImageReviewState,
+  ContentReviewRequest };
