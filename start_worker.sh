@@ -9,7 +9,7 @@ done
 
 # this is to ensure that the backend/DB is fully ready before starting the qworker
 echo "qworker: Backend is ready, starting qworker..."
-if [ "${RUN_QWORKER_DEV_MODE:-true}" = "true" ]; then
+if [ "${RUN_QWORKER_DEV_MODE:-false}" = "true" ]; then
     echo "qworker: Running in DEV mode"
     rm /tmp/backend_ready
     watchfiles --filter python 'python manage.py qcluster' /code/backend
