@@ -271,19 +271,22 @@ def get_pages(course: Course):
     """
     try:
         logger.info(f"Fetching pages for course {course.id}.")
-        pages = list(course.get_pages(include=['body'], per_page=PER_PAGE))
+        pages = list(course.get_pages(per_page=PER_PAGE))
 
         logger.debug(f"Fetched {len(pages)} pages.")
-        for page in pages:
-            logger.info(f"Page ID: {page.page_id}, Title: {page.title}")
+
         images_from_pages = []
         for page in pages:
+            # make a new call to get full page details
+            new_page = course.get_page(page.url)
+            logger.info(f"Page ID: {new_page.page_id}, Title: {new_page.title}, URL: {new_page.url}")
+
             # Extract images from page body
             images_from_pages = append_image_items(
                 images_from_pages,
-                page.page_id,
-                page.title,
-                extract_images_from_html(page.body),
+                new_page.page_id,
+                new_page.title,
+                extract_images_from_html(new_page.body),
                 'page',
                 None)
         return images_from_pages
